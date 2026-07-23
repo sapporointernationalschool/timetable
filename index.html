@@ -1,0 +1,1151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes"
+    />
+    <title>SIS Timetable</title>
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family:
+          "Segoe UI",
+          Roboto,
+          system-ui,
+          -apple-system,
+          sans-serif;
+      }
+
+      body {
+        background: #eaf2ea;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1.2rem;
+      }
+
+      .app-wrapper {
+        max-width: 1500px;
+        width: 100%;
+        background: #ffffff;
+        border-radius: 2.4rem;
+        padding: 2rem 2.2rem 2rem;
+        box-shadow: 0 12px 40px rgba(0, 30, 10, 0.06);
+      }
+
+      /* header */
+      .header-grid {
+        display: grid;
+        grid-template-columns: auto 1fr auto auto;
+        align-items: center;
+        gap: 1rem 1.8rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #eaf0ea;
+        padding-bottom: 1.2rem;
+      }
+
+      .school-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #1f3b2a;
+        letter-spacing: -0.3px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+      }
+      .school-title i {
+        color: #3b7a4b;
+        font-size: 1.5rem;
+      }
+
+      .date-time-box {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        background: #f4faf4;
+        padding: 0.3rem 1.4rem;
+        border-radius: 60px;
+        font-weight: 500;
+        font-size: 0.95rem;
+        color: #1f3b2a;
+        border: 1px solid #dce8dc;
+        white-space: nowrap;
+        justify-self: center;
+      }
+      .date-time-box i {
+        color: #3b7a4b;
+      }
+
+      .grade-dropdown-wrapper {
+        position: relative;
+        justify-self: end;
+      }
+
+      .grade-dropdown {
+        appearance: none;
+        -webkit-appearance: none;
+        background: #f4faf4;
+        border: 1px solid #dce8dc;
+        border-radius: 60px;
+        padding: 0.4rem 2.6rem 0.4rem 1.6rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #1f3b2a;
+        cursor: pointer;
+        transition: 0.15s;
+        outline: none;
+        min-width: 130px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%233b7a4b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1rem;
+      }
+      .grade-dropdown:hover {
+        border-color: #b0ccb0;
+        background-color: #edf7ed;
+      }
+      .grade-dropdown:focus {
+        border-color: #3b7a4b;
+        box-shadow: 0 0 0 3px rgba(59, 122, 75, 0.15);
+      }
+
+      .attendance-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #f0f8f0;
+        padding: 0.3rem 1.2rem 0.3rem 1rem;
+        border-radius: 60px;
+        border: 1px solid #d0e4d0;
+        font-weight: 500;
+        font-size: 0.85rem;
+        color: #1f4a2a;
+        white-space: nowrap;
+      }
+      .attendance-badge i {
+        color: #3b7a4b;
+        font-size: 1rem;
+      }
+      .attendance-badge .count {
+        background: #2a6a3a;
+        color: white;
+        border-radius: 30px;
+        padding: 0.05rem 0.6rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        margin-left: 0.1rem;
+      }
+
+      /* today card */
+      .today-card {
+        background: #f6fbf6;
+        border-radius: 1.8rem;
+        padding: 1.2rem 1.8rem;
+        margin-bottom: 1.8rem;
+        border: 1px solid #e0ede0;
+      }
+
+      .today-card-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.8rem;
+      }
+      .today-card-header h2 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #1f3b2a;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+      .today-card-header h2 i {
+        color: #3b7a4b;
+        font-size: 1.3rem;
+      }
+      .live-badge {
+        background: #e0f0e0;
+        color: #1f4a2a;
+        padding: 0.1rem 1rem;
+        border-radius: 60px;
+        font-weight: 600;
+        font-size: 0.7rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+
+      .class-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 0.8rem;
+        margin-top: 0.2rem;
+      }
+
+      .class-card {
+        background: white;
+        border-radius: 1.4rem;
+        padding: 0.9rem 1rem;
+        border: 1px solid #e6efe6;
+        transition: 0.15s ease;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+      }
+      .class-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 30, 0, 0.05);
+        border-color: #c0dcc0;
+      }
+      .class-card .time-tag {
+        font-size: 0.65rem;
+        font-weight: 600;
+        color: #4a6a4a;
+        letter-spacing: 0.2px;
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+      }
+      .class-card .subject-name {
+        font-size: 1.2rem;
+        font-weight: 700;
+        line-height: 1.2;
+        margin: 0.05rem 0;
+        padding: 0.05rem 0;
+      }
+      .class-card .period-label {
+        font-size: 0.6rem;
+        color: #5f7a5f;
+        opacity: 0.7;
+      }
+      .class-card .status-badge {
+        font-size: 0.55rem;
+        background: #eaf3ea;
+        padding: 0.05rem 0.7rem;
+        border-radius: 30px;
+        align-self: flex-start;
+        margin-top: 0.15rem;
+        color: #2a5a2a;
+        border: 1px solid #d0e4d0;
+      }
+      .empty-message {
+        color: #3a5a3a;
+        font-size: 0.95rem;
+        padding: 0.8rem 0;
+        opacity: 0.7;
+        grid-column: 1 / -1;
+        text-align: center;
+      }
+
+      /* full timetable */
+      .timetable-section {
+        margin-top: 1.6rem;
+        background: #f9fcf9;
+        border-radius: 1.8rem;
+        padding: 1rem 0.6rem 0.6rem;
+        border: 1px solid #e0ede0;
+        overflow-x: auto;
+      }
+      .timetable-section h3 {
+        color: #2a4a32;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.6rem;
+        padding-left: 0.6rem;
+        font-size: 0.9rem;
+        opacity: 0.7;
+      }
+      .timetable-section table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 4px;
+        min-width: 700px;
+      }
+      .timetable-section th {
+        text-align: left;
+        padding: 0.35rem 0.5rem;
+        color: #3a5a3a;
+        font-weight: 500;
+        font-size: 0.7rem;
+        letter-spacing: 0.4px;
+        border-bottom: 1px solid #dce8dc;
+      }
+      .timetable-section td {
+        padding: 0.35rem 0.5rem;
+        background: white;
+        border-radius: 10px;
+        color: #1f3b2a;
+        font-weight: 500;
+        font-size: 0.75rem;
+        border: 1px solid #eaf0ea;
+        white-space: nowrap;
+      }
+      .timetable-section tr:hover td {
+        background: #f4fbf4;
+      }
+      .today-col {
+        background: #edf7ed !important;
+        border-left: 4px solid #3b7a4b;
+      }
+
+      .footer-note {
+        margin-top: 1.4rem;
+        text-align: right;
+        color: #6f8a6f;
+        font-size: 0.65rem;
+        opacity: 0.4;
+        letter-spacing: 0.4px;
+      }
+
+      /* subject colors */
+      .subject-math {
+        color: #c44536;
+      }
+      .subject-english {
+        color: #2a6f8f;
+      }
+      .subject-science {
+        color: #2d7d46;
+      }
+      .subject-art {
+        color: #b4733a;
+      }
+      .subject-pe {
+        color: #b34a6b;
+      }
+      .subject-music {
+        color: #7a5a8a;
+      }
+      .subject-history {
+        color: #a0683a;
+      }
+      .subject-geography {
+        color: #3f7a7a;
+      }
+      .subject-biology {
+        color: #3d8a5a;
+      }
+      .subject-chemistry {
+        color: #b35f3a;
+      }
+      .subject-physics {
+        color: #3a6b9a;
+      }
+      .subject-quran {
+        color: #2a6a3a;
+      }
+      .subject-arabic {
+        color: #8a6a3a;
+      }
+      .subject-javanese {
+        color: #5a7a5a;
+      }
+      .subject-japanese {
+        color: #b34a7a;
+      }
+      .subject-values {
+        color: #6a5a8a;
+      }
+      .subject-it {
+        color: #3a7a8a;
+      }
+      .subject-social {
+        color: #8a6a5a;
+      }
+      .subject-shikatsu {
+        color: #4a7a6a;
+      }
+      .subject-activities {
+        color: #7a7a4a;
+      }
+      .subject-cleaning {
+        color: #5a7a7a;
+      }
+      .subject-default {
+        color: #2a4a32;
+      }
+
+      .timetable-section td .subj-color {
+        font-weight: 600;
+      }
+
+      @media (min-width: 1024px) and (orientation: landscape) {
+        .app-wrapper {
+          padding: 1.8rem 2.4rem 2rem;
+        }
+        .class-cards {
+          grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+          gap: 1rem;
+        }
+        .class-card .subject-name {
+          font-size: 1.3rem;
+        }
+        .timetable-section td {
+          font-size: 0.85rem;
+          padding: 0.5rem 0.7rem;
+        }
+      }
+
+      @media (max-width: 1024px) {
+        .class-cards {
+          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        }
+      }
+
+      @media (max-width: 850px) {
+        .header-grid {
+          grid-template-columns: 1fr;
+          gap: 0.8rem;
+          justify-items: center;
+        }
+        .school-title {
+          justify-self: start;
+        }
+        .grade-dropdown-wrapper {
+          justify-self: center;
+          width: 100%;
+          max-width: 240px;
+        }
+        .grade-dropdown {
+          width: 100%;
+        }
+        .attendance-badge {
+          justify-self: center;
+        }
+        .date-time-box {
+          justify-self: center;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .app-wrapper {
+          padding: 1.2rem;
+        }
+        .today-card {
+          padding: 1rem;
+        }
+        .class-cards {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-wrapper">
+      <!-- header -->
+      <div class="header-grid">
+        <div class="school-title">
+          <img src="sislogo.jpg" width="10%" height="10%" /> Sapporo
+          International School
+        </div>
+
+        <div class="date-time-box">
+          <i class="fas fa-calendar-alt"></i>
+          <span id="currentDate"></span>
+          <i class="fas fa-clock" style="margin-left: 0.5rem"></i>
+          <span id="currentTime"></span>
+        </div>
+
+        <div class="grade-dropdown-wrapper">
+          <select
+            class="grade-dropdown"
+            id="gradeDropdown"
+            aria-label="Select grade"
+          >
+            <!-- filled by js -->
+          </select>
+        </div>
+
+        <!-- 
+        <div class="attendance-badge">
+          <i class="fas fa-user-check"></i> ATTENDANCE
+          <span class="count" id="attendanceCount">0</span>
+        </div>
+        -->
+      </div>
+
+      <!-- TODAY SCHEDULE -->
+      <div class="today-card">
+        <div class="today-card-header">
+          <h2><i class="fas fa-calendar-day"></i> TODAY SCHEDULE</h2>
+          <span class="live-badge"
+            ><i
+              class="fas fa-circle"
+              style="color: #3b7a4b; font-size: 0.5rem"
+            ></i>
+            upcoming</span
+          >
+        </div>
+        <div id="todayClassCards" class="class-cards">
+          <!-- dynamic -->
+        </div>
+      </div>
+
+      <!-- full timetable -->
+      <div class="timetable-section">
+        <h3>
+          <i class="fas fa-table"></i> Weekly ·
+          <span id="gradeLabelTimetable">Grade 1</span>
+        </h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Mon</th>
+              <th>Tue</th>
+              <th>Wed</th>
+              <th>Thu</th>
+              <th>Fri</th>
+            </tr>
+          </thead>
+          <tbody id="timetableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="footer-note"><i class="fas fa-mug-hot"></i> coffee<>code</div>
+    </div>
+
+    <script>
+      (function () {
+        // ----- PERIODS (7 sessions) -----
+        const PERIODS = [
+          { time: "8:00 – 8:50", label: "1", hour: 8, minute: 0 },
+          { time: "9:10 – 10:00", label: "2", hour: 9, minute: 10 },
+          { time: "10:05 – 10:55", label: "3", hour: 10, minute: 5 },
+          { time: "11:00 – 11:50", label: "4", hour: 11, minute: 0 },
+          { time: "13:00 – 13:50", label: "5", hour: 13, minute: 0 },
+          { time: "13:55 – 14:45", label: "6", hour: 13, minute: 55 },
+          { time: "14:50 – 15:40", label: "7", hour: 14, minute: 50 },
+        ];
+
+        // ----- SUBJECT COLOR MAP -----
+        function getSubjectClass(subj) {
+          const map = {
+            Math: "subject-math",
+            English: "subject-english",
+            Science: "subject-science",
+            Art: "subject-art",
+            PE: "subject-pe",
+            Music: "subject-music",
+            History: "subject-history",
+            Geography: "subject-geography",
+            Biology: "subject-biology",
+            Chemistry: "subject-chemistry",
+            Physics: "subject-physics",
+            Quran: "subject-quran",
+            Arabic: "subject-arabic",
+            Javanese: "subject-javanese",
+            Japanese: "subject-japanese",
+            Values: "subject-values",
+            IT: "subject-it",
+            "Social Studies": "subject-social",
+            Shikatsu: "subject-shikatsu",
+            Activities: "subject-activities",
+            Cleaning: "subject-cleaning",
+          };
+          return map[subj] || "subject-default";
+        }
+
+        // ----- SCHEDULE DATA (7 periods per day, 5 days) -----
+        const SCHEDULE_JSON = {
+          grades: [
+            {
+              id: 0,
+              name: "Grade 1",
+              schedule: [
+                [
+                  "Quran",
+                  "Arabic",
+                  "IT",
+                  "Javanese",
+                  "Science",
+                  "English",
+                  "Math",
+                ],
+                ["Quran", "IT", "Math", "Japanese", "Science", "English", "PE"],
+                [
+                  "Quran",
+                  "Math",
+                  "Values",
+                  "Japanese",
+                  "Science",
+                  "English",
+                  "Art",
+                ],
+                [
+                  "Quran",
+                  "Arabic",
+                  "Values",
+                  "Japanese",
+                  "Science",
+                  "English",
+                  "Math",
+                ],
+                [
+                  "Quran",
+                  "Shikatsu",
+                  "Art",
+                  "PE",
+                  "Activities",
+                  "English",
+                  "Cleaning",
+                ],
+              ],
+            },
+            {
+              id: 1,
+              name: "Grade 2",
+              schedule: [
+                [
+                  "Quran",
+                  "Arabic",
+                  "Science",
+                  "Javanese",
+                  "Math",
+                  "English",
+                  "IT",
+                ],
+                [
+                  "Quran",
+                  "English",
+                  "Science",
+                  "Japanese",
+                  "Values",
+                  "Math",
+                  "PE",
+                ],
+                [
+                  "Quran",
+                  "English",
+                  "Science",
+                  "Japanese",
+                  "Math",
+                  "Values",
+                  "Art",
+                ],
+                [
+                  "Quran",
+                  "Arabic",
+                  "Science",
+                  "Japanese",
+                  "IT",
+                  "English",
+                  "Math",
+                ],
+                [
+                  "Quran",
+                  "Shikatsu",
+                  "Art",
+                  "PE",
+                  "Activities",
+                  "English",
+                  "Cleaning",
+                ],
+              ],
+            },
+            {
+              id: 2,
+              name: "Grade 3",
+              schedule: [
+                [
+                  "Math",
+                  "Quran",
+                  "Javanese",
+                  "Science",
+                  "Arabic",
+                  "IT",
+                  "English",
+                ],
+                [
+                  "English",
+                  "Quran",
+                  "Japanese",
+                  "Science",
+                  "Math",
+                  "Social Studies",
+                  "PE",
+                ],
+                [
+                  "English",
+                  "Quran",
+                  "Japanese",
+                  "Science",
+                  "Values",
+                  "Math",
+                  "Art",
+                ],
+                [
+                  "Social Studies",
+                  "Quran",
+                  "Japanese",
+                  "Science",
+                  "Arabic",
+                  "IT",
+                  "English",
+                ],
+                [
+                  "Math",
+                  "Quran",
+                  "Shikatsu",
+                  "PE",
+                  "Activities",
+                  "Values",
+                  "English",
+                ],
+              ],
+            },
+            {
+              id: 3,
+              name: "Grade 4",
+              schedule: [
+                [
+                  "Quran",
+                  "Science",
+                  "Javanese",
+                  "English",
+                  "Math",
+                  "Social Studies",
+                  "Arabic",
+                ],
+                ["Quran", "Science", "Javanese", "IT", "English", "PE", "Math"],
+                [
+                  "Quran",
+                  "Science",
+                  "Javanese",
+                  "Math",
+                  "IT",
+                  "Art",
+                  "English",
+                ],
+                [
+                  "Quran",
+                  "Social Studies",
+                  "Javanese",
+                  "English",
+                  "Math",
+                  "Arabic",
+                  "Values",
+                ],
+                [
+                  "Quran",
+                  "Values",
+                  "Shikatsu",
+                  "Science",
+                  "Activities",
+                  "PE",
+                  "Arabic",
+                ],
+              ],
+            },
+            {
+              id: 4,
+              name: "Grade 5",
+              schedule: [
+                [
+                  "Quran",
+                  "Science",
+                  "Javanese",
+                  "English",
+                  "Math",
+                  "Social Studies",
+                  "Arabic",
+                ],
+                ["Quran", "Science", "Javanese", "IT", "English", "PE", "Math"],
+                [
+                  "Quran",
+                  "Science",
+                  "Javanese",
+                  "Math",
+                  "IT",
+                  "Art",
+                  "English",
+                ],
+                [
+                  "Quran",
+                  "Social Studies",
+                  "Javanese",
+                  "English",
+                  "Math",
+                  "Arabic",
+                  "Values",
+                ],
+                [
+                  "Quran",
+                  "Values",
+                  "Shikatsu",
+                  "Science",
+                  "Activities",
+                  "PE",
+                  "Arabic",
+                ],
+              ],
+            },
+            {
+              id: 5,
+              name: "Grade 6",
+              schedule: [
+                [
+                  "IT",
+                  "English",
+                  "Science",
+                  "Quran",
+                  "Japanese",
+                  "Math",
+                  "Arabic",
+                ],
+                [
+                  "Math",
+                  "Quran",
+                  "Science",
+                  "English",
+                  "Japanese",
+                  "PE",
+                  "Values",
+                ],
+                [
+                  "Math",
+                  "Quran",
+                  "Science",
+                  "English",
+                  "Japanese",
+                  "Art",
+                  "Values",
+                ],
+                [
+                  "IT",
+                  "Quran",
+                  "English",
+                  "Social Studies",
+                  "Japanese",
+                  "Math",
+                  "Arabic",
+                ],
+                [
+                  "Social Studies",
+                  "Quran",
+                  "Science",
+                  "Shikatsu",
+                  "Activities",
+                  "PE",
+                  "Arabic",
+                ],
+              ],
+            },
+            {
+              id: 6,
+              name: "Grade 7",
+              schedule: [
+                [
+                  "IT",
+                  "English",
+                  "Science",
+                  "Quran",
+                  "Japanese",
+                  "Math",
+                  "Arabic",
+                ],
+                [
+                  "Math",
+                  "Quran",
+                  "Science",
+                  "English",
+                  "Japanese",
+                  "PE",
+                  "Values",
+                ],
+                [
+                  "Math",
+                  "Quran",
+                  "Science",
+                  "English",
+                  "Japanese",
+                  "Art",
+                  "Values",
+                ],
+                [
+                  "IT",
+                  "Quran",
+                  "English",
+                  "Social Studies",
+                  "Japanese",
+                  "Math",
+                  "Arabic",
+                ],
+                [
+                  "Social Studies",
+                  "Quran",
+                  "Science",
+                  "Shikatsu",
+                  "Activities",
+                  "PE",
+                  "Arabic",
+                ],
+              ],
+            },
+            {
+              id: 7,
+              name: "Grade 8",
+              schedule: [
+                [
+                  "Quran",
+                  "English",
+                  "Math",
+                  "Science",
+                  "Japanese",
+                  "Values",
+                  "Social Studies",
+                ],
+                ["Science", "Quran", "English", "Math", "Japanese", "PE", "IT"],
+                [
+                  "Science",
+                  "Quran",
+                  "Arabic",
+                  "English",
+                  "Japanese",
+                  "Art",
+                  "Math",
+                ],
+                [
+                  "Quran",
+                  "English",
+                  "Math",
+                  "Values",
+                  "Japanese",
+                  "Social Studies",
+                  "IT",
+                ],
+                [
+                  "Quran",
+                  "Shikatsu",
+                  "Arabic",
+                  "English",
+                  "Activities",
+                  "Science",
+                  "PE",
+                ],
+              ],
+            },
+            {
+              id: 8,
+              name: "Grade 9",
+              schedule: [
+                [
+                  "Quran",
+                  "Science",
+                  "Social Studies",
+                  "Japanese",
+                  "Values",
+                  "Math",
+                  "English",
+                ],
+                ["Quran", "Science", "IT", "Japanese", "Math", "PE", "English"],
+                [
+                  "Quran",
+                  "Science",
+                  "Arabic",
+                  "Japanese",
+                  "Art",
+                  "Math",
+                  "English",
+                ],
+                [
+                  "Quran",
+                  "Science",
+                  "Values",
+                  "Japanese",
+                  "English",
+                  "Math",
+                  "Social Studies",
+                ],
+                [
+                  "Quran",
+                  "IT",
+                  "Arabic",
+                  "Shikatsu",
+                  "Activities",
+                  "English",
+                  "PE",
+                ],
+              ],
+            },
+          ],
+        };
+
+        const gradeData = SCHEDULE_JSON.grades;
+
+        // ----- state -----
+        let currentGradeId = 0;
+
+        const dateSpan = document.getElementById("currentDate");
+        const timeSpan = document.getElementById("currentTime");
+        const gradeDropdown = document.getElementById("gradeDropdown");
+        const todayCards = document.getElementById("todayClassCards");
+        const timetableBody = document.getElementById("timetableBody");
+        const gradeLabelTimetable = document.getElementById(
+          "gradeLabelTimetable",
+        );
+        const attendanceCount = document.getElementById("attendanceCount");
+
+        function getTodayCol() {
+          const day = new Date().getDay();
+          return day >= 1 && day <= 5 ? day - 1 : 0;
+        }
+
+        function getCurrentTimeInMinutes() {
+          const now = new Date();
+          return now.getHours() * 60 + now.getMinutes();
+        }
+
+        function updateDateTime() {
+          const now = new Date();
+          dateSpan.textContent = now.toLocaleDateString("en-US", {
+            weekday: "short",
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          });
+          timeSpan.textContent = now.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          });
+        }
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        // ----- dropdown -----
+        function renderDropdown() {
+          gradeDropdown.innerHTML = "";
+          gradeData.forEach((g) => {
+            const option = document.createElement("option");
+            option.value = g.id;
+            option.textContent = g.name;
+            if (g.id === currentGradeId) option.selected = true;
+            gradeDropdown.appendChild(option);
+          });
+          gradeDropdown.addEventListener("change", function () {
+            setActiveGrade(parseInt(this.value));
+          });
+        }
+
+        // ----- helpers -----
+        function getGradeSchedule(gradeId) {
+          const found = gradeData.find((g) => g.id === gradeId);
+          return found ? found.schedule : gradeData[0].schedule;
+        }
+
+        function getGradeName(gradeId) {
+          const found = gradeData.find((g) => g.id === gradeId);
+          return found ? found.name : "Grade 1";
+        }
+
+        // ----- render functions -----
+        function setActiveGrade(gradeId) {
+          currentGradeId = gradeId;
+          gradeDropdown.value = gradeId;
+          gradeLabelTimetable.textContent = getGradeName(gradeId);
+          renderTodayCards(gradeId);
+          renderFullTimetable(gradeId);
+          updateAttendance(gradeId);
+        }
+
+        function renderTodayCards(gradeId) {
+          const schedule = getGradeSchedule(gradeId);
+          const todayCol = getTodayCol();
+          const todaySubjects = schedule[todayCol] || [];
+          const nowMinutes = getCurrentTimeInMinutes();
+
+          let cardsHtml = "";
+          let anyUpcoming = false;
+
+          for (let p = 0; p < PERIODS.length; p++) {
+            const period = PERIODS[p];
+            const subject = todaySubjects[p] || "—";
+            const classEnd = period.hour * 60 + period.minute + 45;
+            if (classEnd < nowMinutes) continue;
+
+            anyUpcoming = true;
+            const subjectClass = getSubjectClass(subject);
+            cardsHtml += `
+          <div class="class-card">
+            <div class="time-tag"><i class="far fa-clock"></i> ${period.time}</div>
+            <div class="subject-name ${subjectClass}">${subject}</div>
+            <div class="period-label">period ${period.label}</div>
+            <span class="status-badge"><i class="fas fa-arrow-right"></i> upcoming</span>
+          </div>
+        `;
+          }
+
+          todayCards.innerHTML = anyUpcoming
+            ? cardsHtml
+            : `<div class="empty-message"><i class="fas fa-check-circle" style="margin-right: 0.5rem;"></i>No more classes today · enjoy!</div>`;
+        }
+
+        function renderFullTimetable(gradeId) {
+          const schedule = getGradeSchedule(gradeId);
+          const todayCol = getTodayCol();
+
+          let html = "";
+          for (let p = 0; p < PERIODS.length; p++) {
+            const period = PERIODS[p];
+            html += `<tr><td style="white-space:nowrap; color:#3a5a3a; font-size:0.7rem;"><i class="far fa-clock" style="margin-right:4px;"></i>${period.time}</td>`;
+            for (let d = 0; d < 5; d++) {
+              const subject =
+                schedule[d] && schedule[d][p] ? schedule[d][p] : "—";
+              const isToday = d === todayCol;
+              const cls = isToday ? "today-col" : "";
+              const subjClass = getSubjectClass(subject);
+              html += `<td class="${cls}"><span class="subj-color ${subjClass}">${subject}</span></td>`;
+            }
+            html += `</tr>`;
+          }
+          timetableBody.innerHTML = html;
+        }
+
+        function updateAttendance(gradeId) {
+          const schedule = getGradeSchedule(gradeId);
+          const todayCol = getTodayCol();
+          const todaySubjects = schedule[todayCol] || [];
+          const nowMinutes = getCurrentTimeInMinutes();
+          let count = 0;
+          for (let p = 0; p < PERIODS.length; p++) {
+            const period = PERIODS[p];
+            const classEnd = period.hour * 60 + period.minute + 45;
+            if (classEnd >= nowMinutes) count++;
+          }
+          attendanceCount.textContent = count;
+        }
+
+        // ----- init -----
+        renderDropdown();
+        setActiveGrade(0);
+
+        // auto-refresh
+        setInterval(() => {
+          renderTodayCards(currentGradeId);
+          updateAttendance(currentGradeId);
+        }, 20000);
+
+        setInterval(() => {
+          renderTodayCards(currentGradeId);
+          updateAttendance(currentGradeId);
+        }, 15000);
+
+        window.switchGrade = setActiveGrade;
+      })();
+    </script>
+  </body>
+</html>
