@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes"
     />
-    <title>SIS Timetable</title>
+    <title>SIS Timetable · 7 periods</title>
     <!-- Font Awesome -->
     <link
       rel="stylesheet"
@@ -189,7 +189,7 @@
 
       .class-cards {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
         gap: 0.8rem;
         margin-top: 0.2rem;
       }
@@ -241,6 +241,27 @@
         color: #2a5a2a;
         border: 1px solid #d0e4d0;
       }
+      .class-card.now {
+        border-color: #3b7a4b;
+        background: #f0faf0;
+        box-shadow: 0 0 0 2px rgba(59, 122, 75, 0.15);
+      }
+      .class-card.now .status-badge {
+        background: #3b7a4b;
+        color: white;
+        border-color: #3b7a4b;
+        animation: pulse-badge 1.5s ease-in-out infinite;
+      }
+      @keyframes pulse-badge {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.6;
+        }
+      }
+
       .empty-message {
         color: #3a5a3a;
         font-size: 0.95rem;
@@ -299,6 +320,11 @@
       .today-col {
         background: #edf7ed !important;
         border-left: 4px solid #3b7a4b;
+      }
+      .now-col {
+        background: #d4ecd4 !important;
+        border-left: 4px solid #1f7a3a;
+        border-color: #1f7a3a;
       }
 
       .footer-note {
@@ -469,12 +495,11 @@
           </select>
         </div>
 
-        <!-- 
-        <div class="attendance-badge">
+        <!-- <div class="attendance-badge">
           <i class="fas fa-user-check"></i> ATTENDANCE
           <span class="count" id="attendanceCount">0</span>
         </div>
-        -->
+         -->
       </div>
 
       <!-- TODAY SCHEDULE -->
@@ -486,7 +511,7 @@
               class="fas fa-circle"
               style="color: #3b7a4b; font-size: 0.5rem"
             ></i>
-            upcoming</span
+            now / upcoming</span
           >
         </div>
         <div id="todayClassCards" class="class-cards">
@@ -515,7 +540,11 @@
         </table>
       </div>
 
-      <div class="footer-note"><i class="fas fa-mug-hot"></i> coffee<>code</div>
+      <div class="footer-note">
+        <div class="footer-note">
+          <i class="fas fa-mug-hot"></i> coffee<>code
+        </div>
+      </div>
     </div>
 
     <script>
@@ -1052,6 +1081,15 @@
           return found ? found.name : "Grade 1";
         }
 
+        // ----- is class currently in session? -----
+        function isClassNow(periodIndex) {
+          const now = getCurrentTimeInMinutes();
+          const p = PERIODS[periodIndex];
+          const start = p.hour * 60 + p.minute;
+          const end = start + 50; // 50 min duration
+          return now >= start && now < end;
+        }
+
         // ----- render functions -----
         function setActiveGrade(gradeId) {
           currentGradeId = gradeId;
@@ -1074,17 +1112,21 @@
           for (let p = 0; p < PERIODS.length; p++) {
             const period = PERIODS[p];
             const subject = todaySubjects[p] || "—";
-            const classEnd = period.hour * 60 + period.minute + 45;
+            const classEnd = period.hour * 60 + period.minute + 50;
             if (classEnd < nowMinutes) continue;
 
             anyUpcoming = true;
             const subjectClass = getSubjectClass(subject);
+            const nowClass = isClassNow(p);
+            const statusText = nowClass ? "now" : "upcoming";
+            const nowClassAttr = nowClass ? "now" : "";
+
             cardsHtml += `
-          <div class="class-card">
+          <div class="class-card ${nowClassAttr}">
             <div class="time-tag"><i class="far fa-clock"></i> ${period.time}</div>
             <div class="subject-name ${subjectClass}">${subject}</div>
             <div class="period-label">period ${period.label}</div>
-            <span class="status-badge"><i class="fas fa-arrow-right"></i> upcoming</span>
+            <span class="status-badge"><i class="fas ${nowClass ? "fa-circle" : "fa-arrow-right"}"></i> ${statusText}</span>
           </div>
         `;
           }
@@ -1101,14 +1143,17 @@
           let html = "";
           for (let p = 0; p < PERIODS.length; p++) {
             const period = PERIODS[p];
+            const nowClass = isClassNow(p);
             html += `<tr><td style="white-space:nowrap; color:#3a5a3a; font-size:0.7rem;"><i class="far fa-clock" style="margin-right:4px;"></i>${period.time}</td>`;
             for (let d = 0; d < 5; d++) {
               const subject =
                 schedule[d] && schedule[d][p] ? schedule[d][p] : "—";
               const isToday = d === todayCol;
-              const cls = isToday ? "today-col" : "";
+              let cls = isToday ? "today-col" : "";
+              if (isToday && nowClass) cls = "now-col";
               const subjClass = getSubjectClass(subject);
-              html += `<td class="${cls}"><span class="subj-color ${subjClass}">${subject}</span></td>`;
+              const nowIndicator = isToday && nowClass ? " 🔴" : "";
+              html += `<td class="${cls}"><span class="subj-color ${subjClass}">${subject}${nowIndicator}</span></td>`;
             }
             html += `</tr>`;
           }
@@ -1123,7 +1168,7 @@
           let count = 0;
           for (let p = 0; p < PERIODS.length; p++) {
             const period = PERIODS[p];
-            const classEnd = period.hour * 60 + period.minute + 45;
+            const classEnd = period.hour * 60 + period.minute + 50;
             if (classEnd >= nowMinutes) count++;
           }
           attendanceCount.textContent = count;
@@ -1133,16 +1178,12 @@
         renderDropdown();
         setActiveGrade(0);
 
-        // auto-refresh
+        // auto-refresh every 10s (more frequent for "now" status)
         setInterval(() => {
           renderTodayCards(currentGradeId);
+          renderFullTimetable(currentGradeId);
           updateAttendance(currentGradeId);
-        }, 20000);
-
-        setInterval(() => {
-          renderTodayCards(currentGradeId);
-          updateAttendance(currentGradeId);
-        }, 15000);
+        }, 10000);
 
         window.switchGrade = setActiveGrade;
       })();
